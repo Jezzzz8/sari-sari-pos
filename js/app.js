@@ -9,7 +9,9 @@ import {
     addToBill,
     clearBill,
     getSummary,
-    createTransaction
+    createTransaction,
+    updateQty,
+    removeFromBill
 } from './bill.js';
 import { renderCategories, renderProducts, renderBill } from './ui.js';
 import { searchProducts } from './search.js';
@@ -39,9 +41,14 @@ const qtyModal = document.getElementById('qtyModal');
 const qtyDisplay = document.getElementById('qtyDisplay');
 const qtyClose = document.getElementById('qtyClose');
 const btnAddQty = document.getElementById('btnAddQty');
+const qtyProductName = document.getElementById('qtyProductName');
+const qtyProductPrice = document.getElementById('qtyProductPrice');
+const qtyProductImage = document.getElementById('qtyProductImage');
 
+// Checkout modal
 const checkoutModal = document.getElementById('checkoutModal');
 const checkoutClose = document.getElementById('checkoutClose');
+const cashInput = document.getElementById('cashInput');
 
 // Mobile bill elements
 const mobileBillSummary = document.getElementById('mobileBillSummary');
@@ -62,6 +69,9 @@ let currentSort = 'default';
 let pendingProduct = null;
 let pendingQty = 1;
 
+// ========== Helpers ==========
+const isMobile = () => window.innerWidth <= 640;
+
 // ========== Mobile Bill Toggle ==========
 function toggleMobileBill() {
     mobileBillOverlay.classList.toggle('open');
@@ -72,8 +82,7 @@ function updateMobileBillUI() {
     const totalItems = currentBill.reduce((s, b) => s + b.qty, 0);
     const hasItems = currentBill.length > 0;
 
-    // Update floating bar
-    if (hasItems) {
+    if (hasItems && isMobile()) {
         mobileBillSummary.style.display = 'block';
         mobileBillItems.textContent = `🛒 ${totalItems} items`;
         mobileBillTotal.textContent = formatCurrency(summary.grandTotal);
@@ -81,7 +90,6 @@ function updateMobileBillUI() {
         mobileBillSummary.style.display = 'none';
     }
 
-    // Update overlay content
     const now = new Date();
     mobileBillDate.textContent = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
@@ -112,27 +120,27 @@ function updateMobileBillUI() {
     }
     mobileBillItemsList.innerHTML = html;
 
-    // Attach events for mobile bill items
-    mobileBillItemsList.querySelectorAll('.mobile-qty-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = Number(btn.dataset.id);
-            const delta = btn.classList.contains('btn-plus') ? 1 : -1;
-            updateQty(id, delta);
-            renderAll();
-        });
-    });
-    mobileBillItemsList.querySelectorAll('.mobile-remove-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const id = Number(btn.dataset.id);
-            removeFromBill(id);
-            renderAll();
-        });
-    });
-
     mobileBillSubtotal.textContent = formatCurrency(summary.subtotal);
     mobileBillGrandTotal.textContent = formatCurrency(summary.grandTotal);
     mobileCheckoutBtn.disabled = false;
 }
+
+// ========== Event delegation for mobile bill item buttons ==========
+mobileBillItemsList.addEventListener('click', function(e) {
+    const target = e.target.closest('.mobile-qty-btn, .mobile-remove-btn');
+    if (!target) return;
+    const id = Number(target.dataset.id);
+    if (isNaN(id)) return;
+
+    if (target.classList.contains('mobile-qty-btn')) {
+        const delta = target.classList.contains('btn-plus') ? 1 : -1;
+        updateQty(id, delta);
+        renderAll();
+    } else if (target.classList.contains('mobile-remove-btn')) {
+        removeFromBill(id);
+        renderAll();
+    }
+});
 
 // ========== Render All ==========
 function renderAll() {
@@ -149,39 +157,38 @@ function renderAll() {
     renderProducts(productGrid, list, (id) => {
         pendingProduct = products.find(p => p.id === id);
         if (pendingProduct) {
+            // Update product info in quantity modal
+            qtyProductName.textContent = pendingProduct.name;
+            qtyProductPrice.textContent = formatCurrency(pendingProduct.price);
+            qtyProductImage.src = pendingProduct.img || 'assets/images/placeholder.jpg';
+            qtyProductImage.onerror = () => { qtyProductImage.src = 'assets/images/placeholder.jpg'; };
             pendingQty = 1;
-            qtyDisplay.textContent = '1';
+            qtyDisplay.value = '1';
             qtyModal.classList.add('open');
+            // Removed focus to prevent mobile keyboard from appearing
         }
     });
 
     productCount.textContent = list.length + ' items';
-    const catNames = {
-        all: 'All Products',
-        snacks: 'Snacks',
-        drinks: 'Drinks',
-        rice: 'Rice',
-        canned: 'Canned Goods',
-        condiments: 'Condiments',
-        frozen: 'Frozen',
-        fruits: 'Fruits',
-        vegetables: 'Vegetables',
-        other: 'Other'
-    };
     categoryTitle.textContent = getCategoryLabel(currentFilter);
 
     renderBill(billItems, billFooter);
     updateMobileBillUI();
-    
-    // Sync mobile dropdown with current filter
+
     if (categoryMobile) categoryMobile.value = currentFilter;
 }
 
-// ========== Quantity Keypad ==========
+// ========== Quantity Keypad (Numpad + Keyboard) ==========
+qtyDisplay.addEventListener('input', (e) => {
+    let val = parseInt(e.target.value) || 0;
+    if (val < 0) val = 0;
+    pendingQty = val;
+});
+
 qtyModal.querySelectorAll('.qty-grid button').forEach(btn => {
     btn.addEventListener('click', () => {
         const val = btn.dataset.val;
-        let current = parseInt(qtyDisplay.textContent) || 0;
+        let current = parseInt(qtyDisplay.value) || 0;
         if (val === 'back') {
             let str = String(current);
             if (str.length > 1) str = str.slice(0, -1);
@@ -194,8 +201,25 @@ qtyModal.querySelectorAll('.qty-grid button').forEach(btn => {
             pendingQty = parseInt(newStr) || 0;
         }
         if (pendingQty < 0) pendingQty = 0;
-        qtyDisplay.textContent = pendingQty;
+        qtyDisplay.value = pendingQty;
     });
+});
+
+// ===== Quantity + and - buttons =====
+document.getElementById('qtyDec').addEventListener('click', () => {
+    let current = parseInt(qtyDisplay.value) || 0;
+    if (current > 0) {
+        current--;
+        pendingQty = current;
+        qtyDisplay.value = current;
+    }
+});
+
+document.getElementById('qtyInc').addEventListener('click', () => {
+    let current = parseInt(qtyDisplay.value) || 0;
+    current++;
+    pendingQty = current;
+    qtyDisplay.value = current;
 });
 
 btnAddQty.addEventListener('click', () => {
@@ -213,29 +237,36 @@ qtyModal.addEventListener('click', (e) => {
     if (e.target === qtyModal) qtyModal.classList.remove('open');
 });
 
-// ========== Checkout ==========
-function openCheckout() {
+// ========== Cash Numpad + Keyboard ==========
+let cashString = '';
+
+// Attach cash numpad buttons
+document.querySelectorAll('.cash-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const val = btn.dataset.val;
+        if (val === 'back') {
+            cashString = cashString.slice(0, -1);
+        } else if (val === 'clear') {
+            cashString = '';
+        } else {
+            // Allow only one decimal point
+            if (val === '.' && cashString.includes('.')) return;
+            cashString += val;
+        }
+        // Update input and trigger change calculation
+        cashInput.value = cashString;
+        cashInput.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+});
+
+// Listen for keyboard input directly on the cash field
+cashInput.addEventListener('input', () => {
+    const val = cashInput.value;
+    cashString = val === '' ? '' : String(val);
+    
+    // Calculate change & validate
     const summary = getSummary();
-    document.getElementById('coItems').textContent = currentBill.reduce((s, b) => s + b.qty, 0);
-    document.getElementById('coTotal').textContent = formatCurrency(summary.grandTotal);
-    document.getElementById('changeDisplay').textContent = '₱0.00';
-    document.getElementById('changeDisplay').className = 'change-amount';
-    document.getElementById('cashInput').value = '';
-    document.getElementById('checkoutComplete').disabled = true;
-    checkoutModal.classList.add('open');
-    // Close mobile bill overlay if open
-    mobileBillOverlay.classList.remove('open');
-}
-
-checkoutBtn.addEventListener('click', openCheckout);
-mobileCheckoutBtn.addEventListener('click', openCheckout);
-
-checkoutClose.addEventListener('click', () => checkoutModal.classList.remove('open'));
-document.getElementById('checkoutCancel').addEventListener('click', () => checkoutModal.classList.remove('open'));
-
-document.getElementById('cashInput').addEventListener('input', () => {
-    const summary = getSummary();
-    const cash = parseFloat(document.getElementById('cashInput').value);
+    const cash = parseFloat(cashInput.value);
     const changeEl = document.getElementById('changeDisplay');
     const completeBtn = document.getElementById('checkoutComplete');
     if (!isNaN(cash) && cash >= summary.grandTotal) {
@@ -253,8 +284,30 @@ document.getElementById('cashInput').addEventListener('input', () => {
     }
 });
 
+// ========== Checkout ==========
+function openCheckout() {
+    const summary = getSummary();
+    document.getElementById('coItems').textContent = currentBill.reduce((s, b) => s + b.qty, 0);
+    document.getElementById('coTotal').textContent = formatCurrency(summary.grandTotal);
+    document.getElementById('changeDisplay').textContent = '₱0.00';
+    document.getElementById('changeDisplay').className = 'change-amount';
+    // Reset cash
+    cashString = '';
+    cashInput.value = '';
+    document.getElementById('checkoutComplete').disabled = true;
+    checkoutModal.classList.add('open');
+    mobileBillOverlay.classList.remove('open');
+    // Focus the cash field for immediate typing (allowed for cash input)
+    setTimeout(() => cashInput.focus(), 100);
+}
+
+checkoutBtn.addEventListener('click', openCheckout);
+mobileCheckoutBtn.addEventListener('click', openCheckout);
+
+checkoutClose.addEventListener('click', () => checkoutModal.classList.remove('open'));
+document.getElementById('checkoutCancel').addEventListener('click', () => checkoutModal.classList.remove('open'));
+
 document.getElementById('checkoutComplete').addEventListener('click', () => {
-    const cashInput = document.getElementById('cashInput');
     const cash = parseFloat(cashInput.value);
     const summary = getSummary();
     if (isNaN(cash) || cash < summary.grandTotal) return;
@@ -344,6 +397,11 @@ sortFilter.addEventListener('change', (e) => {
     renderAll();
 });
 
+// ========== Resize handler ==========
+window.addEventListener('resize', () => {
+    updateMobileBillUI();
+});
+
 // ========== Keyboard Shortcuts ==========
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -352,8 +410,9 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-document.getElementById('cashInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
+// Also support Enter on cash numpad (click complete)
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && checkoutModal.classList.contains('open')) {
         const btn = document.getElementById('checkoutComplete');
         if (!btn.disabled) btn.click();
     }

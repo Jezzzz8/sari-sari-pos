@@ -42,8 +42,11 @@ export function renderProducts(container, products, onSelectProduct) {
     }
     let html = '';
     for (const p of products) {
+        // Fallback to placeholder if image fails to load
+        const imgSrc = p.img || 'assets/images/placeholder.jpg';
         html += `
             <div class="product-card" data-id="${p.id}">
+                <img src="${imgSrc}" alt="${p.name}" class="product-image" onerror="this.src='assets/images/placeholder.jpg'" loading="lazy" />
                 <div class="product-name">${p.name}</div>
                 <div class="product-price">${formatCurrency(p.price)}</div>
                 <div class="product-category">${p.category}</div>

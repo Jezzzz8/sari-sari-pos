@@ -30,7 +30,6 @@
                     </svg>
                     <input type="text" id="searchInput" placeholder="Search product..." />
                 </div>
-                <!-- Mobile category dropdown moved to grid-header -->
                 <button class="btn-report" id="btnReport">Sales Report</button>
             </div>
         </header>
@@ -51,7 +50,7 @@
                     <div class="grid-header">
                         <h2 id="categoryTitle">All Products</h2>
                         <div class="header-controls">
-                            <!-- Category dropdown for mobile (now placed here) -->
+                            <!-- Category dropdown for mobile -->
                             <select class="category-select-mobile" id="categoryMobile">
                                 <option value="all">All</option>
                                 <option value="snacks">Snacks</option>
@@ -80,7 +79,7 @@
                 <!-- BILL PANEL -->
                 <aside class="bill-panel" id="billPanel">
                     <div class="bill-header">
-                        <h3>🧾 Current Bill</h3>
+                        <h3>Current Bill</h3>
                         <div class="bill-meta">
                             <span id="billDate">-</span>
                         </div>
@@ -111,7 +110,7 @@
     <div class="modal-overlay mobile-bill-overlay" id="mobileBillOverlay">
         <div class="modal mobile-bill-modal">
             <button class="modal-close" id="mobileBillClose">✕</button>
-            <div class="modal-title">🧾 Current Bill</div>
+            <div class="modal-title">Current Bill</div>
             <div class="mobile-bill-date" id="mobileBillDate">-</div>
             <div class="mobile-bill-items-list" id="mobileBillItemsList">
                 <div class="bill-empty">No items added yet.</div>
@@ -124,49 +123,95 @@
         </div>
     </div>
 
-    <!-- QUANTITY KEYPAD MODAL -->
+    <!-- ===== QUANTITY KEYPAD MODAL ===== -->
     <div class="modal-overlay" id="qtyModal">
         <div class="modal qty-modal">
             <button class="modal-close" id="qtyClose">✕</button>
-            <div class="qty-display" id="qtyDisplay">1</div>
-            <div class="qty-grid">
-                <button data-val="1">1</button>
-                <button data-val="2">2</button>
-                <button data-val="3">3</button>
-                <button data-val="back" class="btn-back">⌫</button>
-                <button data-val="4">4</button>
-                <button data-val="5">5</button>
-                <button data-val="6">6</button>
-                <button data-val="clear">C</button>
-                <button data-val="7">7</button>
-                <button data-val="8">8</button>
-                <button data-val="9">9</button>
-                <button data-val="0">0</button>
+            
+            <!-- Added Modal Title here -->
+            <h3 class="modal-title" style="margin-bottom: 16px; margin-top: 8px;">Select Quantity</h3>
+
+            <!-- Product info header -->
+            <div class="qty-product-info" id="qtyProductInfo">
+                <img id="qtyProductImage" src="assets/images/placeholder.jpg" alt="Product" />
+                <div>
+                    <div class="qty-product-name" id="qtyProductName">Product Name</div>
+                    <div class="qty-product-price" id="qtyProductPrice">₱0.00</div>
+                </div>
             </div>
-            <button class="btn-add-qty" id="btnAddQty">➕ Add to Bill</button>
+
+            <!-- Quantity control with + and - -->
+            <div class="qty-control">
+                <button class="qty-dec" id="qtyDec">−</button>
+                <!-- Added readonly so mobile keyboard does NOT pop up -->
+                <input type="number" class="qty-display" id="qtyDisplay" value="1" min="1" step="1" readonly />
+                <button class="qty-inc" id="qtyInc">+</button>
+            </div>
+
+            <!-- Unified Numpad Grid -->
+            <div class="qty-grid">
+                <button class="numpad-btn" data-val="1">1</button>
+                <button class="numpad-btn" data-val="2">2</button>
+                <button class="numpad-btn" data-val="3">3</button>
+                <button class="numpad-btn is-back" data-val="back">⌫</button>
+                
+                <button class="numpad-btn" data-val="4">4</button>
+                <button class="numpad-btn" data-val="5">5</button>
+                <button class="numpad-btn" data-val="6">6</button>
+                <button class="numpad-btn is-clear" data-val="clear">C</button>
+                
+                <button class="numpad-btn" data-val="7">7</button>
+                <button class="numpad-btn" data-val="8">8</button>
+                <button class="numpad-btn" data-val="9">9</button>
+                <button class="numpad-btn" data-val="0">0</button>
+            </div>
+            <button class="btn-add-qty" id="btnAddQty">Add to Bill</button>
         </div>
     </div>
 
-    <!-- CHECKOUT MODAL -->
+    <!-- ===== CHECKOUT MODAL ===== -->
     <div class="modal-overlay" id="checkoutModal">
-        <div class="modal">
+        <div class="modal checkout-modal">
             <button class="modal-close" id="checkoutClose">✕</button>
-            <div class="modal-title">💳 Checkout</div>
+            <div class="modal-title">Checkout</div>
+
             <div class="checkout-summary">
                 <div class="cs-row"><span>Items</span><span id="coItems">0</span></div>
                 <div class="cs-row total"><span>Total Due</span><span class="amount" id="coTotal">₱0.00</span></div>
             </div>
+
+            <!-- Cash input with unified numpad -->
             <div class="checkout-input-group">
                 <label for="cashInput">Cash Received</label>
-                <div class="input-with-icon">
-                    <span>₱</span>
-                    <input type="number" id="cashInput" placeholder="0.00" step="0.01" min="0" />
+                <!-- Kept interactive so the user can type via keyboard -->
+                <div class="cash-display">
+                    <input type="number" id="cashInput" value="" placeholder="0.00" step="0.01" min="0" />
+                </div>
+                
+                <div class="cash-numpad">
+                    <button class="numpad-btn cash-btn" data-val="1">1</button>
+                    <button class="numpad-btn cash-btn" data-val="2">2</button>
+                    <button class="numpad-btn cash-btn" data-val="3">3</button>
+                    <button class="numpad-btn cash-btn is-back" data-val="back">⌫</button>
+                    
+                    <button class="numpad-btn cash-btn" data-val="4">4</button>
+                    <button class="numpad-btn cash-btn" data-val="5">5</button>
+                    <button class="numpad-btn cash-btn" data-val="6">6</button>
+                    <button class="numpad-btn cash-btn is-clear" data-val="clear">C</button>
+                    
+                    <button class="numpad-btn cash-btn" data-val="7">7</button>
+                    <button class="numpad-btn cash-btn" data-val="8">8</button>
+                    <button class="numpad-btn cash-btn" data-val="9">9</button>
+                    <button class="numpad-btn cash-btn" data-val="0" style="grid-column: span 2;">0</button>
+                    <button class="numpad-btn cash-btn" data-val="." style="grid-column: span 2;">.</button>
                 </div>
             </div>
+
             <div class="change-display">
                 <div class="change-label">Change</div>
                 <div class="change-amount" id="changeDisplay">₱0.00</div>
             </div>
+
             <div class="modal-actions">
                 <button class="btn-cancel" id="checkoutCancel">Cancel</button>
                 <button class="btn-complete" id="checkoutComplete" disabled>Complete Transaction</button>
@@ -180,7 +225,7 @@
             <button class="modal-close" id="receiptClose">✕</button>
             <div class="receipt-content" id="receiptContent"></div>
             <div class="receipt-actions">
-                <button class="btn-print" id="btnPrintReceipt">🖨 Print Receipt</button>
+                <button class="btn-print" id="btnPrintReceipt">Print Receipt</button>
                 <button class="btn-close-receipt" id="receiptClose2">Close</button>
             </div>
         </div>
