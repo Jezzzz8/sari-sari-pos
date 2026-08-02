@@ -1,11 +1,8 @@
 import { formatCurrency } from './helpers.js';
-import { transactions, loadPersistedData } from './bill.js';
+import { transactions } from './bill.js';
 import { products } from './data.js';
 import { renderCategories } from './ui.js';
 import { getCategoryLabel } from './constants.js';
-
-// Load persisted transactions
-loadPersistedData();
 
 let currentCategory = 'all';
 let currentSort = 'date-desc';

@@ -1,31 +1,8 @@
 import { generateId } from './helpers.js';
 
 export const currentBill = [];
-export let transactions = [];
+export const transactions = [];
 export let receiptCounter = 0;
-
-const STORAGE_KEY = 'posTransactions';
-const COUNTER_KEY = 'posReceiptCounter';
-
-// Load persisted data
-export function loadPersistedData() {
-    try {
-        const data = localStorage.getItem(STORAGE_KEY);
-        transactions = data ? JSON.parse(data) : [];
-    } catch { transactions = []; }
-    try {
-        const val = localStorage.getItem(COUNTER_KEY);
-        receiptCounter = val ? parseInt(val, 10) : 0;
-    } catch { receiptCounter = 0; }
-}
-
-export function saveTransactions() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
-}
-
-export function saveCounter() {
-    localStorage.setItem(COUNTER_KEY, String(receiptCounter));
-}
 
 // Cart operations
 export function addToBill(product, qty) {
@@ -66,7 +43,6 @@ export function clearBill() {
 export function createTransaction(cash) {
     const summary = getSummary();
     receiptCounter += 1;
-    saveCounter();
     const txn = {
         id: generateId(),
         date: new Date().toLocaleString(),
@@ -79,6 +55,5 @@ export function createTransaction(cash) {
         receiptNumber: receiptCounter
     };
     transactions.push(txn);
-    saveTransactions();
     return txn;
 }

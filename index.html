@@ -123,12 +123,11 @@
         </div>
     </div>
 
-    <!-- ===== QUANTITY KEYPAD MODAL ===== -->
+        <!-- ===== QUANTITY KEYPAD MODAL ===== -->
     <div class="modal-overlay" id="qtyModal">
         <div class="modal qty-modal">
             <button class="modal-close" id="qtyClose">✕</button>
             
-            <!-- Added Modal Title here -->
             <h3 class="modal-title" style="margin-bottom: 16px; margin-top: 8px;">Select Quantity</h3>
 
             <!-- Product info header -->
@@ -140,11 +139,12 @@
                 </div>
             </div>
 
-            <!-- Quantity control with + and - -->
+            <!-- Quantity control with + and - (Replaced input with pure div) -->
             <div class="qty-control">
                 <button class="qty-dec" id="qtyDec">−</button>
-                <!-- Added readonly so mobile keyboard does NOT pop up -->
-                <input type="number" class="qty-display" id="qtyDisplay" value="1" min="1" step="1" readonly />
+                <div class="qty-display" id="qtyDisplayWrapper">
+                    <div id="qtyDisplayValue" class="qty-display-value">1</div>
+                </div>
                 <button class="qty-inc" id="qtyInc">+</button>
             </div>
 
@@ -182,10 +182,10 @@
 
             <!-- Cash input with unified numpad -->
             <div class="checkout-input-group">
-                <label for="cashInput">Cash Received</label>
-                <!-- Kept interactive so the user can type via keyboard -->
-                <div class="cash-display">
-                    <input type="number" id="cashInput" value="" placeholder="0.00" step="0.01" min="0" />
+                <label>Cash Received</label>
+                <!-- Replaced input with a div to prevent mobile keyboard from popping up -->
+                <div class="cash-display" id="cashDisplayWrapper">
+                    <div id="cashInputDisplay" class="cash-display-value">₱0.00</div>
                 </div>
                 
                 <div class="cash-numpad">

@@ -88,7 +88,7 @@
     background: #FECACA;
 }
 
-/* ===== QUANTITY & CASH DISPLAYS (Now acting as containers for inputs) ===== */
+/* ===== QUANTITY & CASH DISPLAYS ===== */
 .qty-display,
 .cash-display {
     font-size: 42px;
@@ -108,9 +108,9 @@
     margin-bottom: 16px;
     width: 100%;
 }
-/* Inner input styling to match the container seamlessly */
-.qty-display input,
-.cash-display input {
+
+/* For the Quantity input (readonly but still input) */
+.qty-display input {
     width: 100%;
     border: none;
     background: transparent;
@@ -123,6 +123,39 @@
     margin: 0;
     font-family: inherit;
 }
+
+/* For the Quantity Display*/
+.qty-display-value {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    padding: 0;
+    margin: 0;
+    font-family: inherit;
+    cursor: default; /* Prevents text selection flashing */
+    user-select: none; /* Prevents text selection */
+}
+
+/* For the Cash Display (pure DIV, no soft keyboard) */
+.cash-display-value {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: center;
+    font-size: inherit;
+    font-weight: inherit;
+    color: inherit;
+    padding: 0;
+    margin: 0;
+    font-family: inherit;
+    cursor: default; /* Prevents text selection flashing */
+    user-select: none; /* Prevents text selection */
+}
+
 /* Remove default spinner buttons from number inputs */
 input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {

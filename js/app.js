@@ -3,9 +3,6 @@ import {
     currentBill,
     transactions,
     receiptCounter,
-    loadPersistedData,
-    saveTransactions,
-    saveCounter,
     addToBill,
     clearBill,
     getSummary,
@@ -19,9 +16,6 @@ import { filterByCategory, sortProducts } from './filter.js';
 import { showReceipt } from './receipt.js';
 import { formatCurrency } from './helpers.js';
 import { getCategoryLabel } from './constants.js';
-
-// Load persisted data
-loadPersistedData();
 
 // DOM refs
 const catPanel = document.getElementById('categoriesPanel');
@@ -38,17 +32,17 @@ const btnReport = document.getElementById('btnReport');
 const categoryMobile = document.getElementById('categoryMobile');
 
 const qtyModal = document.getElementById('qtyModal');
-const qtyDisplay = document.getElementById('qtyDisplay');
 const qtyClose = document.getElementById('qtyClose');
 const btnAddQty = document.getElementById('btnAddQty');
 const qtyProductName = document.getElementById('qtyProductName');
 const qtyProductPrice = document.getElementById('qtyProductPrice');
 const qtyProductImage = document.getElementById('qtyProductImage');
+const qtyDisplayValue = document.getElementById('qtyDisplayValue'); // Pure DIV
 
 // Checkout modal
 const checkoutModal = document.getElementById('checkoutModal');
 const checkoutClose = document.getElementById('checkoutClose');
-const cashInput = document.getElementById('cashInput');
+const cashInputDisplay = document.getElementById('cashInputDisplay'); // Pure DIV
 
 // Mobile bill elements
 const mobileBillSummary = document.getElementById('mobileBillSummary');
@@ -157,15 +151,16 @@ function renderAll() {
     renderProducts(productGrid, list, (id) => {
         pendingProduct = products.find(p => p.id === id);
         if (pendingProduct) {
-            // Update product info in quantity modal
             qtyProductName.textContent = pendingProduct.name;
             qtyProductPrice.textContent = formatCurrency(pendingProduct.price);
             qtyProductImage.src = pendingProduct.img || 'assets/images/placeholder.jpg';
             qtyProductImage.onerror = () => { qtyProductImage.src = 'assets/images/placeholder.jpg'; };
-            pendingQty = 1;
-            qtyDisplay.value = '1';
+            
+            // Reset quantity string and display
+            qtyString = '1';
+            updateQtyDisplay();
+            
             qtyModal.classList.add('open');
-            // Removed focus to prevent mobile keyboard from appearing
         }
     });
 
@@ -178,48 +173,52 @@ function renderAll() {
     if (categoryMobile) categoryMobile.value = currentFilter;
 }
 
-// ========== Quantity Keypad (Numpad + Keyboard) ==========
-qtyDisplay.addEventListener('input', (e) => {
-    let val = parseInt(e.target.value) || 0;
-    if (val < 0) val = 0;
-    pendingQty = val;
-});
+// =============================================================
+// ========== QUANTITY NUMPAD + KEYBOARD (MATH KIDS STYLE) ======
+// =============================================================
 
+let qtyString = '1'; // String-based input, just like cashString
+
+function updateQtyDisplay() {
+    qtyDisplayValue.textContent = qtyString;
+    pendingQty = parseInt(qtyString) || 0;
+}
+
+// On-screen Numpad click handling
 qtyModal.querySelectorAll('.qty-grid button').forEach(btn => {
     btn.addEventListener('click', () => {
         const val = btn.dataset.val;
-        let current = parseInt(qtyDisplay.value) || 0;
         if (val === 'back') {
-            let str = String(current);
-            if (str.length > 1) str = str.slice(0, -1);
-            else str = '0';
-            pendingQty = parseInt(str) || 0;
+            qtyString = qtyString.slice(0, -1);
+            if (qtyString === '') qtyString = '0';
         } else if (val === 'clear') {
-            pendingQty = 0;
+            qtyString = '0';
         } else {
-            let newStr = (current === 0 && val !== '0') ? val : String(current) + String(val);
-            pendingQty = parseInt(newStr) || 0;
+            if (qtyString === '0') {
+                qtyString = val;
+            } else {
+                qtyString += val;
+            }
         }
-        if (pendingQty < 0) pendingQty = 0;
-        qtyDisplay.value = pendingQty;
+        updateQtyDisplay();
     });
 });
 
-// ===== Quantity + and - buttons =====
+// + and - buttons
 document.getElementById('qtyDec').addEventListener('click', () => {
-    let current = parseInt(qtyDisplay.value) || 0;
-    if (current > 0) {
+    let current = parseInt(qtyString) || 0;
+    if (current > 1) { // Prevent going below 1
         current--;
-        pendingQty = current;
-        qtyDisplay.value = current;
+        qtyString = String(current);
+        updateQtyDisplay();
     }
 });
 
 document.getElementById('qtyInc').addEventListener('click', () => {
-    let current = parseInt(qtyDisplay.value) || 0;
+    let current = parseInt(qtyString) || 0;
     current++;
-    pendingQty = current;
-    qtyDisplay.value = current;
+    qtyString = String(current);
+    updateQtyDisplay();
 });
 
 btnAddQty.addEventListener('click', () => {
@@ -228,7 +227,8 @@ btnAddQty.addEventListener('click', () => {
         renderAll();
         qtyModal.classList.remove('open');
         pendingProduct = null;
-        pendingQty = 1;
+        qtyString = '1';
+        updateQtyDisplay();
     }
 });
 
@@ -237,36 +237,23 @@ qtyModal.addEventListener('click', (e) => {
     if (e.target === qtyModal) qtyModal.classList.remove('open');
 });
 
-// ========== Cash Numpad + Keyboard ==========
+// =============================================================
+// ========== CASH NUMPAD + KEYBOARD (MATH KIDS STYLE) ==========
+// =============================================================
+
 let cashString = '';
 
-// Attach cash numpad buttons
-document.querySelectorAll('.cash-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const val = btn.dataset.val;
-        if (val === 'back') {
-            cashString = cashString.slice(0, -1);
-        } else if (val === 'clear') {
-            cashString = '';
-        } else {
-            // Allow only one decimal point
-            if (val === '.' && cashString.includes('.')) return;
-            cashString += val;
-        }
-        // Update input and trigger change calculation
-        cashInput.value = cashString;
-        cashInput.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-});
+// Update the display and calculate change
+function updateCashDisplay() {
+    const amount = parseFloat(cashString) || 0;
+    cashInputDisplay.textContent = formatCurrency(amount);
+    calculateChange();
+}
 
-// Listen for keyboard input directly on the cash field
-cashInput.addEventListener('input', () => {
-    const val = cashInput.value;
-    cashString = val === '' ? '' : String(val);
-    
-    // Calculate change & validate
+// Calculate change and enable/disable the complete button
+function calculateChange() {
     const summary = getSummary();
-    const cash = parseFloat(cashInput.value);
+    const cash = parseFloat(cashString) || 0;
     const changeEl = document.getElementById('changeDisplay');
     const completeBtn = document.getElementById('checkoutComplete');
     if (!isNaN(cash) && cash >= summary.grandTotal) {
@@ -282,6 +269,89 @@ cashInput.addEventListener('input', () => {
         changeEl.className = 'change-amount';
         completeBtn.disabled = true;
     }
+}
+
+// On-screen Numpad click handling
+document.querySelectorAll('.cash-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const val = btn.dataset.val;
+        if (val === 'back') {
+            cashString = cashString.slice(0, -1);
+        } else if (val === 'clear') {
+            cashString = '';
+        } else {
+            if (val === '.' && cashString.includes('.')) return;
+            cashString += val;
+        }
+        updateCashDisplay();
+    });
+});
+
+// Desktop keyboard support for both Quantity and Cash modals
+document.addEventListener('keydown', (e) => {
+    
+    // --- Handle Quantity Modal ---
+    if (qtyModal.classList.contains('open')) {
+        // Enter adds the product to bill
+        if (e.key === 'Enter') {
+            if (pendingProduct && pendingQty > 0) {
+                addToBill(pendingProduct, pendingQty);
+                renderAll();
+                qtyModal.classList.remove('open');
+                pendingProduct = null;
+                qtyString = '1';
+                updateQtyDisplay();
+            }
+            return;
+        }
+
+        // Backspace / Delete clears last digit
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+            e.preventDefault();
+            qtyString = qtyString.slice(0, -1);
+            if (qtyString === '') qtyString = '0';
+            updateQtyDisplay();
+            return;
+        }
+
+        // Number keys 0-9
+        if (e.key >= '0' && e.key <= '9') {
+            e.preventDefault();
+            if (qtyString === '0') {
+                qtyString = e.key;
+            } else {
+                qtyString += e.key;
+            }
+            updateQtyDisplay();
+        }
+        return; // Prevent accidental Cash modal handling if Quantity is open
+    }
+
+    // --- Handle Checkout Modal ---
+    if (checkoutModal.classList.contains('open')) {
+        // Enter triggers complete transaction
+        if (e.key === 'Enter') {
+            const btn = document.getElementById('checkoutComplete');
+            if (!btn.disabled) btn.click();
+            return;
+        }
+
+        // Backspace / Delete clears last digit
+        if (e.key === 'Backspace' || e.key === 'Delete') {
+            e.preventDefault();
+            cashString = cashString.slice(0, -1);
+            updateCashDisplay();
+            return;
+        }
+
+        // Number keys 0-9 and decimal point
+        if ((e.key >= '0' && e.key <= '9') || e.key === '.') {
+            e.preventDefault();
+            if (e.key === '.' && cashString.includes('.')) return;
+            cashString += e.key;
+            updateCashDisplay();
+        }
+    }
 });
 
 // ========== Checkout ==========
@@ -291,14 +361,14 @@ function openCheckout() {
     document.getElementById('coTotal').textContent = formatCurrency(summary.grandTotal);
     document.getElementById('changeDisplay').textContent = '₱0.00';
     document.getElementById('changeDisplay').className = 'change-amount';
-    // Reset cash
+    
+    // Reset cash input and recalculate
     cashString = '';
-    cashInput.value = '';
+    updateCashDisplay();
     document.getElementById('checkoutComplete').disabled = true;
+    
     checkoutModal.classList.add('open');
     mobileBillOverlay.classList.remove('open');
-    // Focus the cash field for immediate typing (allowed for cash input)
-    setTimeout(() => cashInput.focus(), 100);
 }
 
 checkoutBtn.addEventListener('click', openCheckout);
@@ -308,7 +378,7 @@ checkoutClose.addEventListener('click', () => checkoutModal.classList.remove('op
 document.getElementById('checkoutCancel').addEventListener('click', () => checkoutModal.classList.remove('open'));
 
 document.getElementById('checkoutComplete').addEventListener('click', () => {
-    const cash = parseFloat(cashInput.value);
+    const cash = parseFloat(cashString);
     const summary = getSummary();
     if (isNaN(cash) || cash < summary.grandTotal) return;
 
@@ -402,19 +472,11 @@ window.addEventListener('resize', () => {
     updateMobileBillUI();
 });
 
-// ========== Keyboard Shortcuts ==========
+// ========== Global Escape Shortcut ==========
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         document.querySelectorAll('.modal-overlay.open').forEach(el => el.classList.remove('open'));
         mobileBillOverlay.classList.remove('open');
-    }
-});
-
-// Also support Enter on cash numpad (click complete)
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && checkoutModal.classList.contains('open')) {
-        const btn = document.getElementById('checkoutComplete');
-        if (!btn.disabled) btn.click();
     }
 });
 
