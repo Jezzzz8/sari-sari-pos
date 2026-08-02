@@ -1,436 +1,155 @@
-/* Payment View Overlay */
 .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    padding: 20px;
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.4); backdrop-filter:blur(4px);
+    display:none; justify-content:center; align-items:center;
+    z-index:1000; padding:20px;
 }
-.modal-overlay.open {
-    display: flex;
-}
+.modal-overlay.open { display:flex; }
 .modal {
-    background: var(--white);
-    border-radius: 24px;
-    padding: 32px 36px;
-    max-width: 480px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.15);
-    animation: modalIn 0.25s ease;
-    position: relative;
+    background:var(--white); border-radius:24px;
+    padding:32px 36px; max-width:480px; width:100%;
+    max-height:90vh; overflow-y:auto;
+    box-shadow:0 24px 64px rgba(0,0,0,0.15);
+    animation:modalIn 0.25s ease; position:relative;
 }
 @keyframes modalIn {
-    from { opacity: 0; transform: scale(0.94) translateY(10px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+    from { opacity:0; transform:scale(0.94) translateY(10px); }
+    to { opacity:1; transform:scale(1) translateY(0); }
 }
 .modal-close {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    background: none;
-    border: none;
-    font-size: 22px;
-    color: #94A3B8;
-    cursor: pointer;
-    line-height: 1;
-    padding: 4px 8px;
-    border-radius: 6px;
-    transition: var(--transition);
+    position:absolute; top:12px; right:16px;
+    background:none; border:none; font-size:22px;
+    color:#94A3B8; cursor:pointer; line-height:1;
+    padding:4px 8px; border-radius:6px;
+    transition:var(--transition);
 }
-.modal-close:hover {
-    background: #F1F5F9;
-    color: var(--text);
-}
+.modal-close:hover { background:#F1F5F9; color:var(--text); }
 .modal-title {
-    font-size: 22px;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 20px;
+    font-size:22px; font-weight:700; text-align:center;
+    margin-bottom:20px;
 }
 
-/* ===== UNIFIED NUMPAD BUTTON ===== */
 .numpad-btn {
-    padding: 14px 0;
-    font-size: 20px;
-    font-weight: 600;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--white);
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
+    padding:14px 0; font-size:20px; font-weight:600;
+    border:1px solid var(--border); border-radius:10px;
+    background:var(--white); cursor:pointer;
+    transition:var(--transition);
+    display:flex; align-items:center; justify-content:center;
+    width:100%;
 }
-.numpad-btn:hover {
-    background: var(--secondary);
-    border-color: var(--primary);
+.numpad-btn:hover { background:var(--secondary); border-color:var(--primary); }
+.numpad-btn:active { transform:scale(0.96); }
+.numpad-btn.is-back, .numpad-btn.is-clear {
+    background:#FEE2E2; border-color:#FECACA; color:var(--danger);
 }
-.numpad-btn:active {
-    transform: scale(0.96);
+.numpad-btn.is-back:hover, .numpad-btn.is-clear:hover { background:#FECACA; }
+
+.qty-display, .cash-display {
+    font-size:42px; font-weight:700; text-align:center;
+    padding:12px 20px; color:var(--text); letter-spacing:2px;
+    background:var(--bg); border-radius:12px;
+    border:2px solid var(--border); min-height:70px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:inherit; margin-bottom:16px; width:100%;
 }
-/* Special buttons (Back / Clear) */
-.numpad-btn.is-back,
-.numpad-btn.is-clear {
-    background: #FEE2E2;
-    border-color: #FECACA;
-    color: var(--danger);
-}
-.numpad-btn.is-back:hover,
-.numpad-btn.is-clear:hover {
-    background: #FECACA;
+.qty-display-value, .cash-display-value {
+    width:100%; border:none; background:transparent;
+    text-align:center; font-size:inherit; font-weight:inherit;
+    color:inherit; padding:0; margin:0; font-family:inherit;
+    cursor:default; user-select:none;
 }
 
-/* ===== QUANTITY & CASH DISPLAYS ===== */
-.qty-display,
-.cash-display {
-    font-size: 42px;
-    font-weight: 700;
-    text-align: center;
-    padding: 12px 20px;
-    color: var(--text);
-    letter-spacing: 2px;
-    background: var(--bg);
-    border-radius: 12px;
-    border: 2px solid var(--border);
-    min-height: 70px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: inherit;
-    margin-bottom: 16px;
-    width: 100%;
-}
-
-/* For the Quantity input (readonly but still input) */
-.qty-display input {
-    width: 100%;
-    border: none;
-    background: transparent;
-    text-align: center;
-    font-size: inherit;
-    font-weight: inherit;
-    color: inherit;
-    outline: none;
-    padding: 0;
-    margin: 0;
-    font-family: inherit;
-}
-
-/* For the Quantity Display*/
-.qty-display-value {
-    width: 100%;
-    border: none;
-    background: transparent;
-    text-align: center;
-    font-size: inherit;
-    font-weight: inherit;
-    color: inherit;
-    padding: 0;
-    margin: 0;
-    font-family: inherit;
-    cursor: default; /* Prevents text selection flashing */
-    user-select: none; /* Prevents text selection */
-}
-
-/* For the Cash Display (pure DIV, no soft keyboard) */
-.cash-display-value {
-    width: 100%;
-    border: none;
-    background: transparent;
-    text-align: center;
-    font-size: inherit;
-    font-weight: inherit;
-    color: inherit;
-    padding: 0;
-    margin: 0;
-    font-family: inherit;
-    cursor: default; /* Prevents text selection flashing */
-    user-select: none; /* Prevents text selection */
-}
-
-/* Remove default spinner buttons from number inputs */
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-}
-input[type=number] {
-    -moz-appearance: textfield;
-}
-
-/* ===== QUANTITY MODAL SPECIFIC ===== */
 .qty-product-info {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 8px 0 12px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 12px;
+    display:flex; align-items:center; gap:16px;
+    padding:8px 0 12px; border-bottom:1px solid var(--border);
+    margin-bottom:12px;
 }
 .qty-product-info img {
-    width: 56px;
-    height: 56px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    flex-shrink: 0;
+    width:56px; height:56px; object-fit:cover;
+    border-radius:8px; border:1px solid var(--border);
+    flex-shrink:0;
 }
-.qty-product-name {
-    font-weight: 600;
-    font-size: var(--font-md);
-    line-height: 1.3;
-}
-.qty-product-price {
-    font-size: var(--font-base);
-    color: var(--primary);
-    font-weight: 500;
-}
+.qty-product-name { font-weight:600; font-size:var(--font-md); line-height:1.3; }
+.qty-product-price { font-size:var(--font-base); color:var(--primary); font-weight:500; }
 
 .qty-control {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    margin: 8px 0 16px;
+    display:flex; align-items:center; justify-content:center;
+    gap:12px; margin:8px 0 16px;
 }
-.qty-control .qty-display {
-    margin-bottom: 0;
-    min-width: 80px;
-    padding: 12px 20px;
-    flex: 1;
-}
+.qty-control .qty-display { margin-bottom:0; min-width:80px; padding:12px 20px; flex:1; }
 .qty-control button {
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    border: 2px solid var(--border);
-    background: var(--white);
-    font-size: 28px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
+    width:48px; height:48px; border-radius:50%;
+    border:2px solid var(--border); background:var(--white);
+    font-size:28px; font-weight:600; cursor:pointer;
+    transition:var(--transition);
+    display:flex; align-items:center; justify-content:center;
+    line-height:1;
 }
-.qty-control button:hover {
-    background: var(--secondary);
-    border-color: var(--primary);
-}
-.qty-control .qty-dec { color: var(--danger); }
-.qty-control .qty-inc { color: var(--primary); }
+.qty-control button:hover { background:var(--secondary); border-color:var(--primary); }
+.qty-control .qty-dec { color:var(--danger); }
+.qty-control .qty-inc { color:var(--primary); }
 
-.qty-grid,
-.cash-numpad {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-    margin-bottom: 16px;
+.qty-grid, .cash-numpad {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:8px; margin-bottom:16px;
 }
 
 .btn-add-qty {
-    width: 100%;
-    padding: 14px;
-    background: var(--primary);
-    color: var(--white);
-    border: none;
-    border-radius: 12px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: var(--transition);
+    width:100%; padding:14px;
+    background:var(--primary); color:var(--white);
+    border:none; border-radius:12px;
+    font-size:16px; font-weight:700; cursor:pointer;
+    transition:var(--transition);
 }
-.btn-add-qty:hover {
-    background: #2563EB;
-}
+.btn-add-qty:hover { background:#2563EB; }
 
-/* ===== CHECKOUT MODAL SPECIFIC ===== */
 .checkout-summary {
-    background: var(--bg);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
+    background:var(--bg); border-radius:12px;
+    padding:16px 20px; margin-bottom:20px;
 }
 .cs-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    font-size: 15px;
+    display:flex; justify-content:space-between;
+    padding:4px 0; font-size:15px;
 }
 .cs-row.total {
-    font-size: 20px;
-    font-weight: 700;
-    padding-top: 10px;
-    border-top: 1px solid var(--border);
-    margin-top: 6px;
+    font-size:20px; font-weight:700; padding-top:10px;
+    border-top:1px solid var(--border); margin-top:6px;
 }
-.cs-row.total .amount {
-    color: var(--primary);
-}
-.checkout-input-group {
-    margin-bottom: 16px;
-}
+.cs-row.total .amount { color:var(--primary); }
+
+.checkout-input-group { margin-bottom:16px; }
 .checkout-input-group label {
-    font-weight: 600;
-    font-size: 14px;
-    display: block;
-    margin-bottom: 6px;
+    font-weight:600; font-size:14px; display:block;
+    margin-bottom:6px;
 }
-.cash-display {
-    margin-bottom: 12px;
-    padding: 12px 20px;
-    width: 100%;
-}
+.cash-display { margin-bottom:12px; padding:12px 20px; width:100%; }
 
 .change-display {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--secondary);
-    border-radius: 12px;
-    padding: 14px 20px;
-    margin-bottom: 20px;
+    display:flex; justify-content:space-between; align-items:center;
+    background:var(--secondary); border-radius:12px;
+    padding:14px 20px; margin-bottom:20px;
 }
-.change-label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #4B5563;
-}
-.change-amount {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--success);
-}
-.change-amount.negative {
-    color: var(--danger);
-}
+.change-label { font-size:14px; font-weight:600; color:#4B5563; }
+.change-amount { font-size:24px; font-weight:700; color:var(--success); }
+.change-amount.negative { color:var(--danger); }
 
 .modal-actions {
-    display: flex;
-    gap: 12px;
+    display:flex; gap:12px;
 }
 .btn-cancel {
-    flex: 1;
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    background: #F1F5F9;
-    color: #4B5563;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
+    flex:1; padding:14px; border-radius:12px; border:none;
+    background:#F1F5F9; color:#4B5563; font-weight:600;
+    cursor:pointer; transition:var(--transition);
 }
-.btn-cancel:hover {
-    background: var(--border);
-}
+.btn-cancel:hover { background:var(--border); }
 .btn-complete {
-    flex: 1;
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    background: var(--primary);
-    color: var(--white);
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
+    flex:1; padding:14px; border-radius:12px; border:none;
+    background:var(--primary); color:var(--white);
+    font-weight:600; cursor:pointer; transition:var(--transition);
 }
-.btn-complete:hover:not(:disabled) {
-    background: #2563EB;
-}
-.btn-complete:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
+.btn-complete:hover:not(:disabled) { background:#2563EB; }
+.btn-complete:disabled { opacity:0.4; cursor:not-allowed; }
 
-/* ===== REPORT MODAL ===== */
-.report-modal .modal {
-    max-width: 640px;
-}
-.report-content .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    margin-bottom: 20px;
-}
-.report-content .stat-card {
-    background: var(--bg);
-    padding: 16px 20px;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-}
-.report-content .stat-value {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--text);
-}
-.report-content .stat-label {
-    font-size: 13px;
-    color: #94A3B8;
-    font-weight: 500;
-}
-.report-content .top-product {
-    background: var(--secondary);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    border: 1px solid #BFDBFE;
-}
-.report-content .tp-name {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--primary);
-}
-.report-content .tp-count {
-    font-size: 14px;
-    color: #4B5563;
-}
-.transactions-table {
-    max-height: 300px;
-    overflow-y: auto;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-}
-.tr-row {
-    display: grid;
-    grid-template-columns: 100px 1fr 80px 100px;
-    gap: 12px;
-    padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
-    font-size: 13px;
-    align-items: center;
-}
-.tr-row:last-child {
-    border-bottom: none;
-}
-.tr-row .tr-amount {
-    font-weight: 600;
-    color: var(--primary);
-    text-align: right;
-}
-
-/* ===== RESPONSIVE ADJUSTMENTS ===== */
-@media (max-width: 640px) {
-    .report-modal .modal {
-        max-width: 100%;
-        margin: 10px;
-    }
-    .tr-row {
-        grid-template-columns: 70px 1fr 60px 70px;
-        font-size: 12px;
-        gap: 8px;
-    }
-    .qty-display,
-    .cash-display {
-        font-size: 32px;
-        min-height: 60px;
-    }
+@media (max-width:640px) {
+    .qty-display, .cash-display { font-size:32px; min-height:60px; }
 }

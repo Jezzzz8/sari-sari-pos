@@ -4,14 +4,10 @@ export const currentBill = [];
 export const transactions = [];
 export let receiptCounter = 0;
 
-// Cart operations
 export function addToBill(product, qty) {
     const existing = currentBill.find(b => b.id === product.id);
-    if (existing) {
-        existing.qty += qty;
-    } else {
-        currentBill.push({ ...product, qty: qty });
-    }
+    if (existing) existing.qty += qty;
+    else currentBill.push({ ...product, qty });
 }
 
 export function removeFromBill(id) {
@@ -23,11 +19,8 @@ export function updateQty(id, delta) {
     const item = currentBill.find(b => b.id === id);
     if (!item) return;
     const newQty = item.qty + delta;
-    if (newQty <= 0) {
-        removeFromBill(id);
-        return;
-    }
-    item.qty = newQty;
+    if (newQty <= 0) removeFromBill(id);
+    else item.qty = newQty;
 }
 
 export function getSummary() {
@@ -39,7 +32,6 @@ export function clearBill() {
     currentBill.length = 0;
 }
 
-// Create a transaction from current bill
 export function createTransaction(cash) {
     const summary = getSummary();
     receiptCounter += 1;

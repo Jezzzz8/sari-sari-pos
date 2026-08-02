@@ -1,4 +1,3 @@
-// ===== GROCERY ITEMS WITH CATEGORY PRE‑ASSIGNED =====
 const groceryItems = [
     { product_id: 1, product_name: "Dried Mangoes (200g)", product_price: 180, category: "snacks" },
     { product_id: 2, product_name: "Banana Chips (200g)", product_price: 120, category: "snacks" },
@@ -52,21 +51,15 @@ const groceryItems = [
     { product_id: 50, product_name: "Native Chocolate Drink (Sikwate, 250ml)", product_price: 90, category: "drinks" }
 ];
 
-// Helper to generate image filename from product name
-// Removes parentheses and their contents, replaces spaces with '-', converts to lowercase
 function generateImageFilename(name) {
-    // Remove anything inside parentheses (including the parentheses)
     const clean = name.replace(/\([^)]*\)/g, '').trim();
-    // Replace spaces with hyphens, convert to lowercase
     return clean.replace(/\s+/g, '-').toLowerCase() + '.jpg';
 }
 
-// Build products array with image path
 export const products = groceryItems.map(item => ({
     id: item.product_id,
     name: item.product_name,
     price: item.product_price,
     category: item.category,
-    // Use generated filename; fallback to placeholder.jpg if missing
     img: `assets/images/${generateImageFilename(item.product_name)}`
 }));

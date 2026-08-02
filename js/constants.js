@@ -1,4 +1,3 @@
-// Category list and icon mapping – used across multiple modules
 export const CATEGORIES = [
     { key: 'all', label: 'All' },
     { key: 'snacks', label: 'Snacks' },
@@ -12,7 +11,6 @@ export const CATEGORIES = [
     { key: 'other', label: 'Other' }
 ];
 
-// Icon mapping – uses images from assets/icons/ with fallback emoji
 export const CAT_ICONS = {
     'all': { img: 'assets/icons/all.png', emoji: '📋' },
     'snacks': { img: 'assets/icons/snacks.png', emoji: '🥨' },
@@ -26,7 +24,6 @@ export const CAT_ICONS = {
     'other': { img: 'assets/icons/other.png', emoji: '📦' }
 };
 
-// Helper to get category label from key
 export function getCategoryLabel(key) {
     const cat = CATEGORIES.find(c => c.key === key);
     return cat ? cat.label : 'Products';

@@ -1,6 +1,6 @@
 import { formatCurrency } from './helpers.js';
 import { currentBill, getSummary, updateQty, removeFromBill } from './bill.js';
-import { CATEGORIES, CAT_ICONS, getCategoryLabel } from './constants.js';
+import { CATEGORIES, CAT_ICONS } from './constants.js';
 
 export function renderCategories(container, activeCat, onSelect) {
     let html = `<div class="cat-title">Categories</div>`;
@@ -17,15 +17,9 @@ export function renderCategories(container, activeCat, onSelect) {
         } else {
             iconHtml = `<span class="icon-emoji">📌</span>`;
         }
-        html += `
-            <button class="cat-btn ${active}" data-cat="${c.key}">
-                <span class="cat-icon">${iconHtml}</span>
-                ${c.label}
-            </button>
-        `;
+        html += `<button class="cat-btn ${active}" data-cat="${c.key}"><span class="cat-icon">${iconHtml}</span>${c.label}</button>`;
     }
     container.innerHTML = html;
-
     container.querySelectorAll('.cat-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const cat = btn.dataset.cat;
@@ -36,13 +30,11 @@ export function renderCategories(container, activeCat, onSelect) {
 
 export function renderProducts(container, products, onSelectProduct) {
     if (products.length === 0) {
-        container.innerHTML =
-            `<div style="grid-column:1/-1;text-align:center;padding:40px 0;color:#94A3B8;">No products found</div>`;
+        container.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px 0;color:#94A3B8;">No products found</div>`;
         return;
     }
     let html = '';
     for (const p of products) {
-        // Fallback to placeholder if image fails to load
         const imgSrc = p.img || 'assets/images/placeholder.jpg';
         html += `
             <div class="product-card" data-id="${p.id}">
@@ -54,7 +46,6 @@ export function renderProducts(container, products, onSelectProduct) {
         `;
     }
     container.innerHTML = html;
-
     container.querySelectorAll('.product-card').forEach(card => {
         card.addEventListener('click', () => {
             const id = Number(card.dataset.id);
@@ -67,18 +58,15 @@ export function renderBill(container, footerEl) {
     const { subtotal, grandTotal } = getSummary();
     const dateEl = document.getElementById('billDate');
     const now = new Date();
-    dateEl.textContent =
-        `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+    dateEl.textContent = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
     if (currentBill.length === 0) {
-        container.innerHTML =
-            `<div class="bill-empty">No items added yet.<br/><span class="text-muted">Click a product to start.</span></div>`;
+        container.innerHTML = `<div class="bill-empty">No items added yet.<br/><span class="text-muted">Click a product to start.</span></div>`;
         footerEl.querySelector('#billSubtotal').textContent = '₱0.00';
         footerEl.querySelector('#billGrandTotal').textContent = '₱0.00';
         footerEl.querySelector('#checkoutBtn').disabled = true;
         return;
     }
-
     let html = '';
     for (const item of currentBill) {
         html += `

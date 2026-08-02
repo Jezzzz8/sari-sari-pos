@@ -10,24 +10,17 @@
     --shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
     --radius: 16px;
     --transition: 0.2s ease;
-
-    /* ===== TYPOGRAPHY SCALE ===== */
-    --font-base: 14px;          /* body, most text */
-    --font-sm: 12px;            /* small labels, meta */
-    --font-md: 16px;            /* subheadings, buttons */
-    --font-lg: 18px;            /* section titles */
-    --font-xl: 22px;            /* page titles, logo */
-    --font-2xl: 28px;           /* stat numbers */
+    --font-base: 14px;
+    --font-sm: 12px;
+    --font-md: 16px;
+    --font-lg: 18px;
+    --font-xl: 22px;
+    --font-2xl: 28px;
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
+* { margin:0; padding:0; box-sizing:border-box; }
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, sans-serif;
     font-size: var(--font-base);
     background: var(--bg);
     color: var(--text);
@@ -38,42 +31,17 @@ body {
     align-items: center;
     line-height: 1.5;
 }
+h1,h2,h3,h4 { font-weight:600; margin:0; }
+h1 { font-size:var(--font-xl); }
+h2 { font-size:var(--font-lg); }
+h3 { font-size:var(--font-md); }
 
-/* Shared heading styles */
-h1, h2, h3, h4 {
-    font-weight: 600;
-    margin: 0;
-}
-h1 { font-size: var(--font-xl); }
-h2 { font-size: var(--font-lg); }
-h3 { font-size: var(--font-md); }
+.text-muted { color:#94A3B8; }
+.text-sm { font-size:var(--font-sm); }
+.text-md { font-size:var(--font-md); }
+.text-lg { font-size:var(--font-lg); }
+.text-xl { font-size:var(--font-xl); }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
-}
-::-webkit-scrollbar-track {
-    background: var(--secondary);
-    border-radius: 8px;
-}
-::-webkit-scrollbar-thumb {
-    background: var(--primary);
-    border-radius: 8px;
-}
-
-.text-muted {
-    color: #94A3B8;
-}
-.text-sm {
-    font-size: var(--font-sm);
-}
-.text-md {
-    font-size: var(--font-md);
-}
-.text-lg {
-    font-size: var(--font-lg);
-}
-.text-xl {
-    font-size: var(--font-xl);
-}
+::-webkit-scrollbar { width:6px; height:6px; }
+::-webkit-scrollbar-track { background:var(--secondary); border-radius:8px; }
+::-webkit-scrollbar-thumb { background:var(--primary); border-radius:8px; }

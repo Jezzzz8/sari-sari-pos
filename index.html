@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/modal.css" />
     <link rel="stylesheet" href="css/receipt.css" />
+    <link rel="stylesheet" href="css/reports.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
 </head>
 <body>
 
-    <!-- POS CONTAINER -->
     <div class="pos-container" id="app">
 
         <!-- HEADER -->
@@ -31,26 +31,24 @@
                     <input type="text" id="searchInput" placeholder="Search product..." />
                 </div>
                 <button class="btn-report" id="btnReport">Sales Report</button>
+                <button class="btn-report" id="backToPos" style="display:none;">Back to POS</button>
             </div>
         </header>
 
         <!-- MAIN BODY -->
         <div class="main-body">
 
+            <!-- CATEGORIES PANEL -->
+            <aside class="categories-panel" id="categoriesPanel">
+                <div class="cat-title">Categories</div>
+            </aside>
+
             <!-- POS VIEW -->
             <div id="pos-view" style="display:flex; flex:1; overflow:hidden;">
-
-                <!-- CATEGORIES PANEL -->
-                <aside class="categories-panel" id="categoriesPanel">
-                    <div class="cat-title">Categories</div>
-                </aside>
-
-                <!-- PRODUCTS PANEL -->
                 <section class="products-panel" id="productsPanel">
                     <div class="grid-header">
                         <h2 id="categoryTitle">All Products</h2>
                         <div class="header-controls">
-                            <!-- Category dropdown for mobile -->
                             <select class="category-select-mobile" id="categoryMobile">
                                 <option value="all">All</option>
                                 <option value="snacks">Snacks</option>
@@ -76,13 +74,10 @@
                     <div class="product-grid" id="productGrid"></div>
                 </section>
 
-                <!-- BILL PANEL -->
                 <aside class="bill-panel" id="billPanel">
                     <div class="bill-header">
                         <h3>Current Bill</h3>
-                        <div class="bill-meta">
-                            <span id="billDate">-</span>
-                        </div>
+                        <div class="bill-meta"><span id="billDate">-</span></div>
                     </div>
                     <div class="bill-items" id="billItems">
                         <div class="bill-empty">No items added yet.<br/><span class="text-muted">Click a product to start.</span></div>
@@ -94,10 +89,85 @@
                     </div>
                 </aside>
             </div>
+
+            <!-- REPORT VIEW -->
+            <div id="report-view" style="display:none; flex:1; overflow-y:auto; background:var(--bg); padding:24px 32px; flex-direction:column;">
+                <div class="grid-header" style="margin-bottom:20px;">
+                    <h2>Transaction History</h2>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="label">Total Sales</div>
+                        <div class="value" id="totalSales">₱0.00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Total Transactions</div>
+                        <div class="value" id="totalTxns">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="label">Most Purchased Product</div>
+                        <div class="value" id="topProduct" style="font-size:18px;">N/A</div>
+                    </div>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:16px;">
+                    <div style="display:flex; gap:16px; flex-wrap:wrap;">
+                        <select class="category-select-mobile" id="reportCategoryMobile">
+                            <option value="all">All</option>
+                            <option value="snacks">Snacks</option>
+                            <option value="drinks">Drinks</option>
+                            <option value="rice">Rice</option>
+                            <option value="canned">Canned Goods</option>
+                            <option value="condiments">Condiments</option>
+                            <option value="frozen">Frozen</option>
+                            <option value="fruits">Fruits</option>
+                            <option value="vegetables">Vegetables</option>
+                            <option value="other">Other</option>
+                        </select>
+                        <select class="category-select" id="dateRange">
+                            <option value="all">Date Range (All)</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                        </select>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:14px;">
+                        <select class="sort-select" id="sortReport">
+                            <option value="date-desc">Date: Newest</option>
+                            <option value="date-asc">Date: Oldest</option>
+                            <option value="total-desc">Total: High to Low</option>
+                            <option value="total-asc">Total: Low to High</option>
+                        </select>
+                        <span class="count" id="txnCount">0 transactions</span>
+                    </div>
+                </div>
+
+                <div class="report-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width:40px; padding:16px 20px;"></th>
+                                <th style="padding:16px 20px;">Order ID</th>
+                                <th style="padding:16px 20px;">Date &amp; Time</th>
+                                <th style="padding:16px 20px;">Items</th>
+                                <th style="padding:16px 20px;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="txnTableBody"></tbody>
+                    </table>
+                    <div class="pagination-controls">
+                        <button id="prevPageBtn" disabled>◀</button>
+                        <span id="pageIndicator">1 / 1</span>
+                        <button id="nextPageBtn" disabled>▶</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- MOBILE BILL FLOATING SUMMARY BAR -->
+    <!-- MOBILE BILL SUMMARY -->
     <div class="mobile-bill-summary" id="mobileBillSummary" style="display:none;">
         <div class="mobile-bill-summary-inner">
             <span class="mobile-bill-items" id="mobileBillItems">🛒 0 items</span>
@@ -123,14 +193,11 @@
         </div>
     </div>
 
-        <!-- ===== QUANTITY KEYPAD MODAL ===== -->
+    <!-- QUANTITY MODAL -->
     <div class="modal-overlay" id="qtyModal">
         <div class="modal qty-modal">
             <button class="modal-close" id="qtyClose">✕</button>
-            
-            <h3 class="modal-title" style="margin-bottom: 16px; margin-top: 8px;">Select Quantity</h3>
-
-            <!-- Product info header -->
+            <h3 class="modal-title" style="margin-bottom:16px; margin-top:8px;">Select Quantity</h3>
             <div class="qty-product-info" id="qtyProductInfo">
                 <img id="qtyProductImage" src="assets/images/placeholder.jpg" alt="Product" />
                 <div>
@@ -138,28 +205,20 @@
                     <div class="qty-product-price" id="qtyProductPrice">₱0.00</div>
                 </div>
             </div>
-
-            <!-- Quantity control with + and - (Replaced input with pure div) -->
             <div class="qty-control">
                 <button class="qty-dec" id="qtyDec">−</button>
-                <div class="qty-display" id="qtyDisplayWrapper">
-                    <div id="qtyDisplayValue" class="qty-display-value">1</div>
-                </div>
+                <div class="qty-display"><div id="qtyDisplayValue" class="qty-display-value">1</div></div>
                 <button class="qty-inc" id="qtyInc">+</button>
             </div>
-
-            <!-- Unified Numpad Grid -->
             <div class="qty-grid">
                 <button class="numpad-btn" data-val="1">1</button>
                 <button class="numpad-btn" data-val="2">2</button>
                 <button class="numpad-btn" data-val="3">3</button>
                 <button class="numpad-btn is-back" data-val="back">⌫</button>
-                
                 <button class="numpad-btn" data-val="4">4</button>
                 <button class="numpad-btn" data-val="5">5</button>
                 <button class="numpad-btn" data-val="6">6</button>
                 <button class="numpad-btn is-clear" data-val="clear">C</button>
-                
                 <button class="numpad-btn" data-val="7">7</button>
                 <button class="numpad-btn" data-val="8">8</button>
                 <button class="numpad-btn" data-val="9">9</button>
@@ -169,49 +228,38 @@
         </div>
     </div>
 
-    <!-- ===== CHECKOUT MODAL ===== -->
+    <!-- CHECKOUT MODAL -->
     <div class="modal-overlay" id="checkoutModal">
         <div class="modal checkout-modal">
             <button class="modal-close" id="checkoutClose">✕</button>
             <div class="modal-title">Checkout</div>
-
             <div class="checkout-summary">
                 <div class="cs-row"><span>Items</span><span id="coItems">0</span></div>
                 <div class="cs-row total"><span>Total Due</span><span class="amount" id="coTotal">₱0.00</span></div>
             </div>
-
-            <!-- Cash input with unified numpad -->
             <div class="checkout-input-group">
                 <label>Cash Received</label>
-                <!-- Replaced input with a div to prevent mobile keyboard from popping up -->
-                <div class="cash-display" id="cashDisplayWrapper">
-                    <div id="cashInputDisplay" class="cash-display-value">₱0.00</div>
-                </div>
-                
+                <div class="cash-display"><div id="cashInputDisplay" class="cash-display-value">₱0.00</div></div>
                 <div class="cash-numpad">
                     <button class="numpad-btn cash-btn" data-val="1">1</button>
                     <button class="numpad-btn cash-btn" data-val="2">2</button>
                     <button class="numpad-btn cash-btn" data-val="3">3</button>
                     <button class="numpad-btn cash-btn is-back" data-val="back">⌫</button>
-                    
                     <button class="numpad-btn cash-btn" data-val="4">4</button>
                     <button class="numpad-btn cash-btn" data-val="5">5</button>
                     <button class="numpad-btn cash-btn" data-val="6">6</button>
                     <button class="numpad-btn cash-btn is-clear" data-val="clear">C</button>
-                    
                     <button class="numpad-btn cash-btn" data-val="7">7</button>
                     <button class="numpad-btn cash-btn" data-val="8">8</button>
                     <button class="numpad-btn cash-btn" data-val="9">9</button>
-                    <button class="numpad-btn cash-btn" data-val="0" style="grid-column: span 2;">0</button>
-                    <button class="numpad-btn cash-btn" data-val="." style="grid-column: span 2;">.</button>
+                    <button class="numpad-btn cash-btn" data-val="0" style="grid-column:span 2;">0</button>
+                    <button class="numpad-btn cash-btn" data-val="." style="grid-column:span 2;">.</button>
                 </div>
             </div>
-
             <div class="change-display">
                 <div class="change-label">Change</div>
                 <div class="change-amount" id="changeDisplay">₱0.00</div>
             </div>
-
             <div class="modal-actions">
                 <button class="btn-cancel" id="checkoutCancel">Cancel</button>
                 <button class="btn-complete" id="checkoutComplete" disabled>Complete Transaction</button>
